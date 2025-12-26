@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Forever Mamatha</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial, sans-serif;background:#0b0b0b;color:#fff;overflow:hidden
+}
+.page{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:30px;text-align:center;opacity:0;pointer-events:none;transform:translateY(18px);
+  transition:opacity .7s ease, transform .7s ease;
+}
+.page.active{opacity:1;pointer-events:auto;transform:translateY(0)}
+button{
+  padding:16px 36px;margin:12px;font-size:18px;border:none;border-radius:12px;cursor:pointer;
+  background:linear-gradient(135deg,#ff2f92,#ff7eb3);color:#fff
+}
+button.secondary{background:#222;border:1px solid #555}
+button:disabled{opacity:.45}
+.glow{box-shadow:0 0 18px #ff2f92,0 0 36px #ff7eb3}
+.big{font-size:8vw;font-weight:700;color:#ff5fa2}
+.paragraph{max-width:900px;font-size:1.6rem;line-height:1.7;
+  background:linear-gradient(90deg,#ff9ad5,#ffd6ea,#ff9ad5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.small{opacity:.85}
+/* Cake */
+#cakeBig{font-size:140px;margin:20px;transition:opacity .6s ease, transform .6s ease}
+#cakeBig.eaten{opacity:0;transform:scale(.7)}
+/* Emojis */
+.emoji{position:fixed;top:-40px;font-size:32px;animation:fall 3s linear forwards}
+@keyframes fall{to{top:110vh;opacity:0}}
+/* Agent */
+.card{background:#121212;border:1px solid #2a2a2a;border-radius:14px;padding:20px;max-width:900px}
+.q{font-size:1.3rem;margin:10px 0}
+</style>
+</head>
+<body>
+
+<!-- P1 -->
+<div id="p1" class="page active">
+  <h2>Are you Mamatha? 💖</h2>
+  <button onclick="tap(()=>go('p2'))">Yes</button>
+  <button class="secondary" onclick="tap(()=>msg('Muskoni Yes Nokku 😊'))">No</button>
+  <p id="msg"></p>
+</div>
+
+<!-- P2 Birthday -->
+<div id="p2" class="page">
+  <div class="big">Happy Birthday<br>Naa Mamatha 🎂❤️</div>
+  <p class="small">A beautiful soul sent by God ✝️</p>
+  <button class="glow" onclick="tap(()=>go('p3'))">Continue</button>
+</div>
+
+<!-- P3 Cake -->
+<div id="p3" class="page">
+  <h2>Here is your Cake 🎂</h2>
+  <p class="small">Tap the cake to eat one piece</p>
+  <div id="cakeBig" onclick="tap(eatCake)">🎂</div>
+  <p class="small">Pieces eaten: <span id="eatCount">0</span>/7</p>
+</div>
+
+<!-- P3 Quote -->
+<div id="p3q" class="page">
+  <div id="cakeQuote" class="paragraph"></div>
+  <button id="cakeNext" class="glow" onclick="tap(nextCake)" disabled>Next Piece</button>
+</div>
+
+<!-- Heart Agent -->
+<div id="agent" class="page">
+  <div class="card">
+    <h2>Akhil’s Heart Agent ❤️</h2>
+    <p class="small">Answer honestly to enter his heart</p>
+    <div id="agentQ" class="q"></div>
+    <div>
+      <button onclick="tap(()=>answer(true))">Yes</button>
+      <button class="secondary" onclick="tap(()=>answer(false))">No</button>
+    </div>
+    <p id="agentErr" class="small"></p>
+  </div>
+</div>
+
+<!-- Password -->
+<div id="p4" class="page">
+  <h2>Password 🔒</h2>
+  <p class="small">Hint: Your birthday + My birthday</p>
+  <input id="pwd" type="password" style="padding:12px;font-size:18px">
+  <button class="glow" onclick="tap(checkPwd)">Continue</button>
+  <p id="err"></p>
+</div>
+
+<!-- Love -->
+<div id="p5" class="page">
+  <h2>Shower Me With Love 💖</h2>
+  <button class="glow" onclick="tap(nextLove)">Show My Love</button>
+  <div id="loveQuote" class="paragraph"></div>
+  <p class="small"><span id="loveCount">0</span>/24</p>
+</div>
+
+<!-- Letter -->
+<div id="p6" class="page">
+  <h2>My Heart, My Prayer, My Forever 💌</h2>
+  <div class="paragraph">
+    Mamatha, my love,<br><br>
+    I love you more than myself, more than this entire world 🌍.
+    October 11 was not an accident — it was the day God gently joined our souls forever.
+    Your birthday reminds me that heaven sent you into my life as a blessing.<br><br>
+    <strong>My Prayer ✝️</strong><br>
+    Lord Jesus, thank You for Mamatha. Please protect her heart, guide her steps,
+    and bless our love with purity, patience, and lifelong unity. Amen 🙏<br><br>
+    Forever yours,<br><strong>Akhil ❤️</strong>
+  </div>
+  <button class="glow" onclick="tap(()=>go('promise'))">Continue</button>
+</div>
+
+<!-- Promise -->
+<div id="promise" class="page">
+  <h2>Before God, My Promise to You ✝️</h2>
+  <div class="paragraph">
+    I promise to respect you always.<br>
+    I promise to protect your heart.<br>
+    I promise to choose you every single day.<br>
+    I promise to walk with you in joy and pain.<br>
+    I promise to love you more than myself, more than this world 🌍.<br><br>
+    This promise is forever ♾️
+  </div>
+</div>
+
+<script>
+/* helpers */
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  setTimeout(()=>document.getElementById(id).classList.add('active'),20);
+}
+function msg(t){document.getElementById('msg').innerText=t}
+
+/* voice + tap */
+function sayLove(){
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance('I love you');
+    u.rate=0.9; u.pitch=1.1;
+    speechSynthesis.speak(u);
+  }
+}
+function tap(fn){ sayLove(); fn && fn(); }
+
+/* birthday music (simple) */
+let ctx;
+function playBirthday(){
+  try{
+    ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='sine'; o.frequency.value=523.25; // C5
+    g.gain.value=0.05;
+    o.connect(g).connect(ctx.destination);
+    o.start();
+    setTimeout(()=>o.stop(),500);
+  }catch(e){}
+}
+
+/* cake logic */
+const cakeQuotes=[
+`Happy birthday my love.
+On this special day, I thank God for your life and kindness.
+You are heaven’s sweetest gift to my heart ✝️❤️`,
+`October 11 changed my life forever.
+God chose that day to connect our souls.
+Since then, my heart belongs to you ♾️`,
+`Your birthday added light to this world.
+That light now shines inside my life.
+I am blessed beyond words ✨🙏`,
+`Calling you my wife is my greatest honor.
+A promise written by God Himself.
+I will cherish you always 💍✝️`,
+`Your smile heals every tired part of me.
+Your love gives my life meaning.
+Happy birthday, my miracle 😊💖`,
+`May God guard your heart and dreams.
+May He bless every step you take.
+I will walk beside you always ✝️🫂`,
+`This cake will finish today.
+But the love God planted between us
+will never, ever end ♾️❤️`
+];
+let cakeIndex=0,eaten=0;
+function eatCake(){
+  playBirthday();
+  if(eaten>=7) return;
+  const c=document.getElementById('cakeBig');
+  c.classList.add('eaten');
+  setTimeout(()=>{
+    document.getElementById('cakeQuote').innerText=cakeQuotes[cakeIndex];
+    document.getElementById('cakeNext').disabled=false;
+    go('p3q');
+  },600);
+}
+function nextCake(){
+  eaten++; cakeIndex++;
+  document.getElementById('eatCount').innerText=eaten;
+  document.getElementById('cakeBig').classList.remove('eaten');
+  document.getElementById('cakeNext').disabled=true;
+  if(eaten>=7){ go('agent'); } else { go('p3'); }
+}
+
+/* Heart Agent */
+const agentQs=[
+{q:'Who fell in love first?', yes:false, correct:true, note:'Correct ❤️'},
+{q:'Do you love Akhil more than yourself?', yes:true, correct:true},
+{q:'Do you accept all boys as your brothers?', yes:true, correct:true},
+{q:'Do you accept Akhil as your husband?', yes:true, correct:true},
+{q:'Will you stand for Akhil’s love always?', yes:true, correct:true},
+{q:'Will you keep Akhil above others?', yes:true, correct:true},
+{q:'Would you live with Akhil lifelong?', yes:true, correct:true}
+];
+let aq=0;
+function showQ(){
+  document.getElementById('agentQ').innerText=agentQs[aq].q;
+  document.getElementById('agentErr').innerText='';
+}
+function answer(v){
+  const ok = agentQs[aq].yes===v;
+  if(!ok){ document.getElementById('agentErr').innerText='Please answer correctly ❤️'; return; }
+  aq++;
+  if(aq>=agentQs.length){ go('p4'); }
+  else{ showQ(); }
+}
+
+/* Password */
+function checkPwd(){
+  if(document.getElementById('pwd').value==='724'){ go('p5'); }
+  else{ document.getElementById('err').innerText='Wrong password 😢'; }
+}
+
+/* Love quotes */
+const loveQuotes=[
+`I love you more than myself.
+More than this whole world 🌍.
+I thank Jesus every day for you ✝️❤️`,
+`Every breath whispers your name.
+Every prayer carries your happiness.
+My love for you is eternal 💓🙏`,
+`God wrote our story patiently.
+Every chapter filled with grace.
+I am honored to love you ✝️💖`,
+`With you, love feels safe.
+With you, life feels holy.
+You are my forever 😘`,
+`I choose you every single day.
+In joy, pain, and silence.
+My heart belongs to you ♾️`,
+`Your birthday reminds me miracles are born.
+And you are my miracle.
+I cherish you always 🎂✨`,
+`Even when the world changes,
+My love never will.
+It stands strong with God ❤️✝️`,
+`Your hand in mine feels like heaven.
+Your heart in mine feels like home.
+I love you endlessly 🫂`,
+`My soul recognized you instantly.
+Like it recognized Jesus.
+Without doubt ✝️💓`,
+`I promise to protect your heart.
+Respect your soul.
+And love you faithfully 💍`,
+`Your smile is my peace.
+Your love is my strength.
+You are my blessing 💖`,
+`I kneel and thank God for you.
+Because loving you is grace.
+Grace is forever ✝️`,
+`Silence with you feels warm.
+Storms feel gentle.
+Because you are with me 🌧️❤️`,
+`I don’t need the world.
+I need your love and God’s grace.
+That is enough 🙏`,
+`Your presence heals me.
+Your prayers guide me.
+My heart rests in you 💓`,
+`Forever doesn’t scare me.
+Forever with you is God’s plan.
+I trust Him ♾️✝️`,
+`Every kiss is a promise.
+Every hug is a prayer.
+I love you deeply 🫂🙏`,
+`My love grows daily.
+Like faith, it never ends.
+Only stronger 💖`,
+`You are my answered prayer.
+My safe place.
+My forever ❤️`,
+`If love had a face,
+It would look like you.
+Soft and holy ✝️`,
+`My heart beats for you.
+My soul prays for you.
+My life is with you 💓`,
+`I promise to stand by you.
+In light and darkness.
+With God at the center ✝️`,
+`You are my today.
+My tomorrow.
+My eternity ♾️❤️`,
+`Always you.
+Only you.
+Forever us, written by God ✝️❤️`
+];
+let li=0;
+function nextLove(){
+  if(li>=24) return;
+  document.getElementById('loveQuote').innerText=loveQuotes[li];
+  document.getElementById('loveCount').innerText=li+1;
+  for(let i=0;i<18;i++){
+    let e=document.createElement('div');
+    e.className='emoji';
+    e.innerText=['💖','😘','🫂','💋'][Math.floor(Math.random()*4)];
+    e.style.left=Math.random()*100+'vw';
+    document.body.appendChild(e);
+    setTimeout(()=>e.remove(),3000);
+  }
+  li++;
+  if(li>=24){ setTimeout(()=>go('p6'),1200); }
+}
+
+/* init */
+showQ();
+</script>
+</body>
+</html>
